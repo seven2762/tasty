@@ -13,9 +13,7 @@ services:
     ports:
       - ${MYSQL_PORT}:3306
     volumes:
-      - ./backend/db/conf.d:/etc/mysql/conf.d
-      - ./backend/db/data:/var/lib/mysql
-      - ./backend/db/initdb.d:/docker-entrypoint-initdb.d
+      - ./mysql_data:/var/lib/mysql
     env_file: .env
 
   redis:

@@ -5,6 +5,10 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+### MYSQL ###
+/backend/db/
+*.sql
+*.db
 ### STS ###
 .apt_generated
 .classpath
