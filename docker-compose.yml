@@ -1,0 +1,67 @@
+
+services:
+  database:
+    image: mysql:8.0.34
+    platform: linux/amd64
+    restart: always
+    environment:
+      TZ: ${TZ}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - ${MYSQL_PORT}:3306
+    volumes:
+      - ./backend/db/conf.d:/etc/mysql/conf.d
+      - ./backend/db/data:/var/lib/mysql
+      - ./backend/db/initdb.d:/docker-entrypoint-initdb.d
+    env_file: .env
+
+  redis:
+    image: redis:6.2-alpine
+    ports:
+      - 6379:6379
+    volumes:
+      - redis-data:/data
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./backend:/app
+      - gradle-cache:/root/.gradle
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+    ports:
+      - 8080:8080
+    depends_on:
+      - database
+      - redis
+    env_file: .env
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./frontend:/app
+    environment:
+      - NODE_ENV=development
+    ports:
+      - 3000:3000
+    depends_on:
+      - backend
+
+volumes:
+  gradle-cache:
+  redis-data:
