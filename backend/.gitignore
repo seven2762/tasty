@@ -9,6 +9,7 @@ build/
 /backend/db/
 *.sql
 *.db
+./mysql_data
 ### STS ###
 .apt_generated
 .classpath
